@@ -1,0 +1,88 @@
+/* Header component styles - Gazzetta.gr inspired */
+/* Clean, professional header with modern typography */
+
+.header {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  color: white;
+  padding: 24px 32px;
+  text-align: center;
+  border-bottom: 3px solid #1e40af;
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+  pointer-events: none;
+}
+
+.header h1 {
+  font-size: 2.5em;
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  position: relative;
+  z-index: 1;
+}
+
+.header p {
+  opacity: 0.95;
+  font-size: 1.2em;
+  margin: 0;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+}
+
+/* Add a subtle pattern overlay */
+.header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px),
+    radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 50px 50px, 30px 30px, 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .header {
+    padding: 20px 24px;
+  }
+  
+  .header h1 {
+    font-size: 2em;
+  }
+  
+  .header p {
+    font-size: 1em;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 16px 20px;
+  }
+  
+  .header h1 {
+    font-size: 1.8em;
+  }
+  
+  .header p {
+    font-size: 0.9em;
+  }
+}

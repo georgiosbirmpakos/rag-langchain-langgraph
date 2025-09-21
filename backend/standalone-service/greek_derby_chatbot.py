@@ -24,6 +24,8 @@ from typing_extensions import TypedDict
 
 # Web scraping imports
 from langchain_community.document_loaders import WebBaseLoader
+import bs4
+import requests
 
 # Pinecone
 from pinecone import Pinecone
@@ -167,13 +169,112 @@ class GreekDerbyChatbot:
         stats = self.index.describe_index_stats()
         
         if stats['total_vector_count'] == 0:
-            print("📚 No knowledge base found. Creating sample content...")
-            self._create_sample_knowledge_base()
+            print("📚 No knowledge base found. Loading content from Gazzetta.gr...")
+            self._load_gazzetta_content()
         else:
             print(f"📚 Knowledge base loaded with {stats['total_vector_count']} vectors")
     
+    def _load_gazzetta_content(self):
+        """Load content from Gazzetta.gr for Greek derby information"""
+        import time
+        import bs4
+        
+        # Set user agent to avoid blocking
+        os.environ['USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        
+        # URLs to scrape from Gazzetta.gr related to Olympiakos and Panathinaikos
+        greek_derby_urls = [
+            "https://www.gazzetta.gr/football/superleague/olympiakos",
+            "https://www.gazzetta.gr/football/superleague/panathinaikos",
+            "https://www.gazzetta.gr/football/superleague",
+            "https://www.gazzetta.gr",
+        ]
+        
+        print("Loading Greek football content from Gazzetta.gr...")
+        
+        # Load content from multiple URLs with better selectors
+        all_docs = []
+        for url in greek_derby_urls:
+            try:
+                print(f"Loading: {url}")
+                
+                # First try with broader selectors to get more content
+                loader = WebBaseLoader(
+                    web_paths=(url,),
+                    bs_kwargs=dict(
+                        parse_only=bs4.SoupStrainer(
+                            class_=("article-content", "article-title", "article-body", "content", "post-content", 
+                                   "entry-content", "post-body", "article-text", "main-content", "story-content",
+                                   "article", "post", "content-area", "main", "body")
+                        )
+                    ),
+                )
+                docs = loader.load()
+                
+                # If no content found, try without any class filtering
+                if not docs or all(len(doc.page_content.strip()) < 100 for doc in docs):
+                    print(f"  No content found with selectors, trying without filtering...")
+                    loader_fallback = WebBaseLoader(web_paths=(url,))
+                    docs = loader_fallback.load()
+                
+                # Filter out very short documents
+                valid_docs = [doc for doc in docs if len(doc.page_content.strip()) > 50]
+                all_docs.extend(valid_docs)
+                
+                print(f"  Found {len(valid_docs)} valid documents from {url}")
+                time.sleep(1)  # Be respectful to the server
+                
+            except Exception as e:
+                print(f"Error loading {url}: {e}")
+                continue
+        
+        print(f"Loaded {len(all_docs)} documents from Gazzetta.gr")
+        
+        # If still no content, try a different approach with requests
+        if len(all_docs) == 0 or all(len(doc.page_content.strip()) < 100 for doc in all_docs):
+            print("\nTrying alternative approach with requests...")
+            try:
+                import requests
+                response = requests.get("https://www.gazzetta.gr/football/superleague", 
+                                      headers={'User-Agent': os.environ['USER_AGENT']})
+                if response.status_code == 200:
+                    # Create a document from the raw HTML content
+                    fallback_doc = Document(
+                        page_content=response.text,
+                        metadata={"source": "https://www.gazzetta.gr/football/superleague", "method": "requests"}
+                    )
+                    all_docs.append(fallback_doc)
+                    print("Added fallback document from requests")
+            except Exception as e:
+                print(f"Fallback approach also failed: {e}")
+        
+        if not all_docs:
+            print("❌ Failed to load content from Gazzetta.gr. Falling back to sample content...")
+            self._create_sample_knowledge_base()
+            return
+        
+        # Split and store the documents
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=500,
+            chunk_overlap=100,
+            separators=["\n\n", "\n", ". ", "! ", "? ", " ", ""]
+        )
+        
+        splits = text_splitter.split_documents(all_docs)
+        
+        # Add metadata to identify the source
+        for split in splits:
+            if "source" not in split.metadata:
+                split.metadata["source"] = "gazzetta.gr"
+            split.metadata["type"] = "greek_derby_news"
+        
+        # Store in vector database
+        self.vector_store.add_documents(splits)
+        
+        print(f"✅ Gazzetta.gr knowledge base created with {len(splits)} chunks")
+    
     def _create_sample_knowledge_base(self):
-        """Create sample knowledge base with Greek derby content"""
+        """Create sample knowledge base with Greek derby content (fallback)"""
         sample_content = """
 Ολυμπιακός vs Παναθηναϊκός - Το Μεγάλο Ντέρμπι της Ελλάδας
 
@@ -395,3 +496,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

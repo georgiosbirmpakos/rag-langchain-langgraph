@@ -1,87 +1,178 @@
 # Greek Derby RAG Chatbot 🇬🇷⚽
 
-An interactive chatbot about the Olympiakos vs Panathinaikos derby using RAG (Retrieval-Augmented Generation) with memory. Available as a standalone application, Jupyter notebook, and web API.
+A comprehensive RAG (Retrieval-Augmented Generation) chatbot system about the Olympiakos vs Panathinaikos derby, featuring real-time content from [Gazzetta.gr](https://www.gazzetta.gr/), multiple frontend interfaces, and a robust backend API.
 
 ## 🌟 Features
 
-- 🤖 **Interactive Chat**: Real-time conversation about the Greek derby
-- 🧠 **Memory**: Remembers conversation history across sessions
-- 📚 **RAG System**: Retrieves relevant information from knowledge base
-- 🇬🇷 **Greek Language**: Fully supports Greek language with proper prompts
-- 💾 **Export**: Save conversations to JSON files
-- 📊 **Statistics**: View conversation analytics
-- 🌐 **Web API**: FastAPI-based REST API for web integration
-- 📱 **Web Client**: Fullscreen HTML client for browser-based chat
-- 📓 **Jupyter Notebook**: Interactive development and testing environment
-- 🔧 **MCP Server**: Model Context Protocol server for AI tool integration
+### **🤖 Advanced RAG System**
+- **Real-time Content**: Automatically fetches latest news from Gazzetta.gr
+- **Intelligent Retrieval**: LangGraph-based RAG with semantic search
+- **Memory System**: Conversation history and context awareness
+- **Greek Language**: Full support for Greek language with proper prompts
+
+### **🎨 Multiple Frontend Options**
+- **React Frontend**: Modern, responsive React application with Gazzetta.gr-inspired design
+- **Vanilla JavaScript**: Lightweight HTML/CSS/JS client
+- **Web API**: FastAPI-based REST API with automatic documentation
+- **Jupyter Notebook**: Interactive development and testing environment
+
+### **📚 Knowledge Base**
+- **Gazzetta.gr Integration**: Live content from Greece's premier sports website
+- **Multi-source Data**: Olympiakos, Panathinaikos, and Super League pages
+- **Intelligent Fallback**: Sample content if web scraping fails
+- **Vector Storage**: Pinecone for efficient semantic search
 
 ## 🚀 Quick Start
 
-### Option 1: Web API (Recommended)
+### **Prerequisites**
+- Python 3.8+
+- Node.js 16+
+- OpenAI API key
+- Pinecone API key
 
-1. **Install dependencies:**
-   ```bash
-   pip install fastapi uvicorn python-multipart
-   ```
-
-2. **Configure environment:**
-   Create a `.env` file with your API keys:
-   ```env
-   OPENAI_API_KEY=your_openai_api_key_here
-   PINECONE_API_KEY=your_pinecone_api_key_here
-   PINECONE_GREEK_DERBY_INDEX_NAME=your_index_name
-   ```
-
-3. **Start the API server:**
-   ```bash
-   python greek_derby_api.py
-   ```
-
-4. **Open the web client:**
-   - Open `chatbot_web_client.html` in your browser
-   - Or visit `http://localhost:8000` for API documentation
-
-### Option 2: Standalone Application
-
+### **1. Clone and Setup**
 ```bash
-python greek_derby_chatbot.py
+git clone <repository-url>
+cd rag-langchain-langgraph
 ```
 
-### Option 3: Jupyter Notebook
+### **2. Environment Configuration**
+Create a `.env` file in the project root:
+```env
+# Required API Keys
+OPENAI_API_KEY=your_openai_api_key_here
+PINECONE_API_KEY=your_pinecone_api_key_here
+PINECONE_GREEK_DERBY_INDEX_NAME=your_index_name
 
+# Optional
+USER_AGENT=greek-derby-chatbot/1.0
+```
+
+### **3. Install Dependencies**
+
+**Backend Dependencies:**
 ```bash
-jupyter notebook greek-derby-rag.ipynb
+pip install -r requirements_api.txt
+```
+
+**Frontend Dependencies:**
+```bash
+cd front-end/react-chatbot
+npm install
+```
+
+### **4. Start the Application**
+
+**Option A: Full Stack (Recommended)**
+```bash
+# Terminal 1: Start Backend API
+cd backend/api
+python greek_derby_api.py
+
+# Terminal 2: Start React Frontend
+cd front-end/react-chatbot
+npm run dev
+```
+
+**Option B: Vanilla JavaScript Frontend**
+```bash
+# Terminal 1: Start Backend API
+cd backend/api
+python greek_derby_api.py
+
+# Terminal 2: Open HTML client
+# Open front-end/vanilla_javascript/chatbot_web_client.html in browser
+```
+
+**Option C: Standalone Application**
+```bash
+cd backend/standalone-service
+python greek_derby_chatbot.py
 ```
 
 ## 📁 Project Structure
 
 ```
 rag-langchain-langgraph/
-├── greek_derby_api.py              # FastAPI web server
-├── chatbot_web_client.html         # Fullscreen web client
-├── greek_derby_chatbot.py          # Standalone chatbot application
-├── greek-derby-rag.ipynb           # Jupyter notebook for development
-├── requirements_api.txt            # Web API dependencies
-├── README.md                       # This documentation
-└── .env                           # Environment variables (create this)
+├── backend/
+│   ├── api/
+│   │   └── greek_derby_api.py          # FastAPI web server
+│   ├── standalone-service/
+│   │   └── greek_derby_chatbot.py      # Core RAG chatbot
+│   └── README.md                       # Backend documentation
+├── front-end/
+│   ├── react-chatbot/                  # Modern React frontend
+│   │   ├── src/
+│   │   │   ├── components/             # React components
+│   │   │   ├── hooks/                  # Custom React hooks
+│   │   │   ├── services/               # API service layer
+│   │   │   ├── context/                # State management
+│   │   │   └── types/                  # TypeScript definitions
+│   │   ├── package.json
+│   │   └── README.md
+│   └── vanilla_javascript/
+│       └── chatbot_web_client.html     # Lightweight HTML client
+├── ipynb testing/
+│   ├── greek-derby-rag.ipynb           # Development notebook
+│   └── rag-langchain-langgraph.ipynb   # RAG tutorial notebook
+├── requirements_api.txt                # Python dependencies
+├── .env                               # Environment variables (create this)
+└── README.md                          # This file
 ```
 
-## 🌐 Web API Endpoints
+## 🎨 Frontend Options
 
-### Chat Endpoints
-- `POST /chat` - Ask questions to the chatbot
-- `GET /history` - Get conversation history
-- `GET /stats` - Get conversation statistics
-- `POST /clear` - Clear conversation memory
-- `GET /export` - Export conversation to JSON
+### **React Frontend (Modern)**
+- **Framework**: React 19 with TypeScript
+- **Styling**: Gazzetta.gr-inspired design with modern CSS
+- **State Management**: Context API with useReducer
+- **API Integration**: Custom hooks for API calls
+- **Features**: Responsive design, smooth animations, error handling
 
-### Utility Endpoints
-- `GET /` - API information and sample questions
-- `GET /health` - Health check
-- `GET /sample-questions` - Get sample questions
+**Start React Frontend:**
+```bash
+cd front-end/react-chatbot
+npm install
+npm run dev
+# Open http://localhost:5173
+```
 
-### Example API Usage
+### **Vanilla JavaScript Frontend (Lightweight)**
+- **Technology**: Pure HTML/CSS/JavaScript
+- **Features**: Fullscreen interface, real-time chat, sample questions
+- **Compatibility**: Works in any modern browser
 
+**Use Vanilla Frontend:**
+```bash
+# Start backend first
+cd backend/api
+python greek_derby_api.py
+
+# Open in browser
+# front-end/vanilla_javascript/chatbot_web_client.html
+```
+
+## 🌐 Backend API
+
+### **Core Endpoints**
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/` | API information and sample questions |
+| `GET` | `/health` | Health check and system status |
+| `POST` | `/chat` | Send message to chatbot |
+| `GET` | `/history` | Get conversation history |
+| `GET` | `/stats` | Get conversation statistics |
+| `POST` | `/clear` | Clear conversation memory |
+| `GET` | `/export` | Export conversation to JSON |
+| `GET` | `/sample-questions` | Get sample questions |
+
+### **API Documentation**
+- **Interactive Docs**: `http://localhost:8000/docs`
+- **ReDoc**: `http://localhost:8000/redoc`
+- **Health Check**: `http://localhost:8000/health`
+
+### **Example API Usage**
 ```bash
 # Ask a question
 curl -X POST "http://localhost:8000/chat" \
@@ -95,20 +186,42 @@ curl "http://localhost:8000/history"
 curl "http://localhost:8000/stats"
 ```
 
+## 🔄 Gazzetta.gr Integration
+
+### **Content Sources**
+The system automatically loads content from:
+- **Olympiakos Page**: `https://www.gazzetta.gr/football/superleague/olympiakos`
+- **Panathinaikos Page**: `https://www.gazzetta.gr/football/superleague/panathinaikos`
+- **Super League Page**: `https://www.gazzetta.gr/football/superleague`
+- **Main Gazzetta Page**: `https://www.gazzetta.gr`
+
+### **Content Processing**
+- **Smart Scraping**: Multiple CSS selectors for optimal content extraction
+- **Fallback Methods**: Alternative approaches if primary scraping fails
+- **Content Filtering**: Removes irrelevant or short content
+- **Greek-friendly Splitting**: Optimized chunking for Greek language
+- **Metadata Enrichment**: Source URLs and content type information
+
+## 🧠 RAG System Architecture
+
+### **Core Components**
+1. **Language Model**: GPT-4o-mini for Greek language support
+2. **Embeddings**: OpenAI text-embedding-3-small (1024 dimensions)
+3. **Vector Store**: Pinecone for document storage and retrieval
+4. **RAG Pipeline**: LangGraph-based retrieval and generation
+5. **Memory**: ConversationBufferMemory for context awareness
+6. **Web Framework**: FastAPI for REST API
+7. **Frontend**: React/HTML clients for user interaction
+
+### **Knowledge Base**
+- **Real-time Content**: Live data from Gazzetta.gr
+- **Historical Data**: Sample content as fallback
+- **Vector Search**: Semantic similarity search
+- **Chunk Management**: 500-character chunks with 100-character overlap
+
 ## 💻 Usage Examples
 
-### Interactive Commands (Standalone App)
-
-- Ask any question about the derby in Greek
-- `ιστορικό` - Show conversation history
-- `διαγραφή` - Clear memory
-- `στατιστικά` - Show statistics
-- `εξαγωγή` - Export conversation
-- `βοήθεια` - Show help
-- `έξοδος` - Exit
-
-### Sample Questions
-
+### **Sample Questions**
 - "Ποια είναι η ιστορία του ντέρμπι;"
 - "Ποιος έχει κερδίσει περισσότερες φορές;"
 - "Ποιοι είναι οι κορυφαίοι παίκτες;"
@@ -118,40 +231,18 @@ curl "http://localhost:8000/stats"
 - "Ποια είναι τα στατιστικά;"
 - "Ποια είναι τα γήπεδα;"
 
-## 🏗️ Architecture
-
-### Core Components
-
-1. **Language Model**: GPT-4o-mini for Greek language support
-2. **Embeddings**: OpenAI text-embedding-3-small for Greek text
-3. **Vector Store**: Pinecone for document storage and retrieval
-4. **RAG System**: LangGraph-based retrieval and generation
-5. **Memory**: ConversationBufferMemory for context awareness
-6. **Web Framework**: FastAPI for REST API
-7. **Frontend**: HTML/CSS/JavaScript for web client
-
-### Knowledge Base
-
-The chatbot includes a comprehensive knowledge base about:
-- Derby history and statistics
-- Key players and moments
-- Stadium information
-- Fan culture and significance
-- Memorable goals and events
-- Rivalry origins and development
-
-### Data Sources
-
-- **Primary**: Web scraping from www.gazzetta.gr
-- **Fallback**: Sample knowledge base with curated content
-- **Vector Storage**: Pinecone index for semantic search
+### **Interactive Commands (Standalone App)**
+- Ask any question about the derby in Greek
+- `ιστορικό` - Show conversation history
+- `διαγραφή` - Clear memory
+- `στατιστικά` - Show statistics
+- `εξαγωγή` - Export conversation
+- `βοήθεια` - Show help
+- `έξοδος` - Exit
 
 ## 🔧 Configuration
 
-### Environment Variables
-
-Create a `.env` file in the project root:
-
+### **Environment Variables**
 ```env
 # Required
 OPENAI_API_KEY=your_openai_api_key_here
@@ -162,66 +253,59 @@ PINECONE_GREEK_DERBY_INDEX_NAME=your_index_name
 USER_AGENT=greek-derby-chatbot/1.0
 ```
 
-### Pinecone Setup
-
-1. Create a Pinecone account at [pinecone.io](https://pinecone.io)
-2. Create a new index with:
-   - Name: `greek-derby-index` (or your preferred name)
-   - Dimensions: 1536 (for OpenAI embeddings)
+### **Pinecone Setup**
+1. Create account at [pinecone.io](https://pinecone.io)
+2. Create index with:
+   - Dimensions: 1024 (for text-embedding-3-small)
    - Metric: cosine
+   - Name: `greek-derby-index` (or your preferred name)
 
-## 📱 Web Client Features
+## 🎨 Design Features
 
-### Fullscreen Interface
-- **Responsive Design**: Works on desktop, tablet, and mobile
-- **Smooth Scrolling**: Auto-scrolls as conversation grows
-- **Message Timestamps**: Shows when each message was sent
-- **Sample Questions**: Click to try pre-made questions
-- **Error Handling**: Shows connection errors gracefully
+### **React Frontend (Gazzetta.gr Inspired)**
+- **Modern UI**: Clean, professional sports website aesthetic
+- **Card-based Design**: Messages and components use card layouts
+- **Gradient Backgrounds**: Professional blue gradients
+- **Smooth Animations**: Hover effects and transitions
+- **Responsive Design**: Works on all devices
+- **Greek Typography**: Inter font for better readability
 
-### Interactive Elements
-- **Real-time Chat**: Instant responses from the API
-- **Scroll Controls**: Button to jump to latest messages
-- **Loading Indicators**: Shows when processing requests
-- **Greek Language Support**: Properly displays Greek text
+### **Vanilla JavaScript Frontend**
+- **Fullscreen Interface**: Immersive chat experience
+- **Real-time Updates**: Instant message display
+- **Sample Questions**: Click-to-send functionality
+- **Scroll Controls**: Auto-scroll and manual controls
+- **Error Handling**: Graceful error display
 
 ## 🧪 Development
 
-### Jupyter Notebook
+### **Jupyter Notebooks**
+- **greek-derby-rag.ipynb**: Complete RAG system implementation
+- **rag-langchain-langgraph.ipynb**: RAG tutorial and development
 
-The `greek-derby-rag.ipynb` notebook provides:
-- Interactive development environment
-- Step-by-step RAG system building
-- Web scraping and data processing
-- Vector store management
-- Testing and debugging tools
-
-### API Development
-
-The FastAPI server includes:
-- Automatic API documentation at `/docs`
-- Interactive testing interface
-- CORS support for web clients
-- Error handling and validation
-- Health monitoring
+### **API Development**
+- **FastAPI**: Automatic documentation and testing
+- **CORS Support**: Frontend integration ready
+- **Error Handling**: Comprehensive error management
+- **Health Monitoring**: System status endpoints
 
 ## 📊 Performance
 
-### Memory Management
-- **Conversation History**: Stored in memory during session
-- **Vector Store**: Persistent storage in Pinecone
-- **Export Functionality**: Save conversations to JSON files
-- **Memory Clearing**: Reset conversation context
+### **Expected Performance**
+- **Initial Load**: 30-60 seconds (Gazzetta.gr content loading)
+- **Query Response**: 2-5 seconds per question
+- **Memory Usage**: ~200-500MB depending on content size
+- **Vector Storage**: ~1-5MB for typical content
 
-### Scalability
-- **Stateless API**: Each request is independent
-- **Vector Search**: Efficient semantic search
-- **Caching**: Pinecone handles vector caching
-- **Load Balancing**: FastAPI supports multiple workers
+### **Optimization Features**
+- **Vector Caching**: Pinecone handles vector caching
+- **Chunk Optimization**: Greek-friendly text splitting
+- **Memory Management**: Efficient conversation storage
+- **Error Recovery**: Graceful fallback mechanisms
 
 ## 🛠️ Troubleshooting
 
-### Common Issues
+### **Common Issues**
 
 1. **API Keys Missing**:
    - Ensure `.env` file exists with valid keys
@@ -231,50 +315,57 @@ The FastAPI server includes:
    - Verify index name matches environment variable
    - Check Pinecone service status
 
-3. **Web Client Issues**:
-   - Ensure API server is running on port 8000
+3. **Frontend Issues**:
+   - Ensure backend API is running on port 8000
    - Check browser console for errors
    - Verify CORS settings
 
-4. **Memory Issues**:
-   - The chatbot creates a sample knowledge base if none exists
-   - Check available RAM for large conversations
+4. **Content Loading**:
+   - System falls back to sample content if Gazzetta.gr fails
+   - Check network connectivity
+   - Verify USER_AGENT environment variable
 
-### Getting Help
-
-1. Check the API documentation at `http://localhost:8000/docs`
-2. Review the Jupyter notebook for implementation details
+### **Getting Help**
+1. Check API documentation at `http://localhost:8000/docs`
+2. Review Jupyter notebooks for implementation details
 3. Check browser console for client-side errors
 4. Verify all environment variables are set correctly
 
 ## 🔒 Security
 
-### API Security
-- **Input Validation**: All inputs are validated
-- **Error Handling**: Sensitive information is not exposed
+### **API Security**
+- **Input Validation**: Pydantic models for request validation
+- **Error Handling**: No sensitive information exposure
 - **CORS Configuration**: Configurable for production use
 
-### Data Privacy
-- **No Data Storage**: Conversations are not permanently stored
-- **API Key Protection**: Keys are loaded from environment variables
+### **Data Privacy**
+- **No Personal Data**: System doesn't store personal information
 - **Local Processing**: All processing happens on your machine
+- **API Key Protection**: Keys loaded from environment variables
 
 ## 📈 Future Enhancements
 
-### Planned Features
+### **Planned Features**
 - [ ] User authentication and profiles
 - [ ] Conversation persistence in database
 - [ ] Multi-language support
 - [ ] Voice input/output
 - [ ] Mobile app
 - [ ] Real-time data updates
+- [ ] Additional Greek sports websites
 
-### Contributing
+### **Contributing**
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
+
+## 📚 Documentation
+
+- **Backend**: `backend/README.md` - Detailed backend documentation
+- **React Frontend**: `front-end/react-chatbot/README.md` - React-specific guide
+- **API Docs**: `http://localhost:8000/docs` - Interactive API documentation
 
 ## 📄 License
 
@@ -286,6 +377,8 @@ This project is for educational purposes. Please respect API usage limits and te
 - **Pinecone** for vector database services
 - **LangChain** for RAG framework
 - **FastAPI** for web framework
+- **React** for frontend framework
+- **Gazzetta.gr** for content source
 - **Greek Football Community** for inspiration
 
 ---

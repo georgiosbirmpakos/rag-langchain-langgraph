@@ -1,0 +1,100 @@
+/* SampleQuestions component styles - Gazzetta.gr inspired */
+/* Modern card-based design with clean typography */
+
+.sample-questions {
+  margin: 0;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sample-questions h3 {
+  color: #1e40af;
+  margin-bottom: 16px;
+  font-size: 1.2em;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sample-questions h3::before {
+  content: '💡';
+  font-size: 1.1em;
+}
+
+.questions-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sample-question {
+  display: inline-block;
+  background: white;
+  color: #374151;
+  padding: 10px 16px;
+  margin: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid #d1d5db;
+  font-family: inherit;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.sample-question::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.sample-question:hover {
+  background: #3b82f6;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  border-color: #2563eb;
+}
+
+.sample-question:hover::before {
+  left: 100%;
+}
+
+.sample-question:active {
+  transform: translateY(0);
+}
+
+.loading-text,
+.error-text {
+  color: #666;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.error-text {
+  color: #dc3545;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .sample-questions {
+    padding: 12px 15px;
+  }
+  
+  .sample-question {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
