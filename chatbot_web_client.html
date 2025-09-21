@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🇬🇷 Greek Derby Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            background: white;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            height: calc(100vh - 120px);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            border: none;
+            border-top: 2px solid #f1f2f6;
+            border-bottom: 2px solid #f1f2f6;
+            padding: 20px;
+            margin: 0;
+            background: #f8f9fa;
+            scroll-behavior: smooth;
+        }
+        
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user-message {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .bot-message {
+            background: #28a745;
+            color: white;
+            margin-right: auto;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            background: white;
+            border-top: 2px solid #f1f2f6;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .message-input:focus {
+            border-color: #007bff;
+        }
+        
+        .send-button {
+            padding: 15px 25px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .send-button:hover {
+            background: #0056b3;
+        }
+        
+        .send-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .sample-questions {
+            margin: 0;
+            padding: 15px 20px;
+            background: #e3f2fd;
+            border-top: 2px solid #f1f2f6;
+        }
+        
+        .sample-questions h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .sample-question {
+            display: inline-block;
+            background: white;
+            color: #1976d2;
+            padding: 8px 12px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            border: 1px solid #bbdefb;
+        }
+        
+        .sample-question:hover {
+            background: #1976d2;
+            color: white;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .error {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .scroll-controls {
+            position: relative;
+            margin: 0;
+        }
+        
+        .scroll-button {
+            position: absolute;
+            right: 30px;
+            top: -60px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            opacity: 0.9;
+            z-index: 1000;
+        }
+        
+        .scroll-button:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        
+        .scroll-button.hidden {
+            display: none;
+        }
+        
+        /* Responsive design for smaller screens */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+            
+            .message {
+                max-width: 90%;
+                padding: 12px;
+            }
+            
+            .scroll-button {
+                right: 20px;
+                width: 45px;
+                height: 45px;
+                font-size: 16px;
+            }
+            
+            .input-container {
+                padding: 15px;
+            }
+            
+            .message-input {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .send-button {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Fullscreen mode improvements */
+        @media (min-width: 1200px) {
+            .chat-messages {
+                padding: 30px;
+            }
+            
+            .message {
+                max-width: 70%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇬🇷 Greek Derby Chatbot</h1>
+            <p>Ask questions about Olympiakos vs Panathinaikos derby</p>
+        </div>
+        
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <strong>Chatbot</strong>
+                        <small style="opacity: 0.7; font-size: 0.8em;">${new Date().toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}</small>
+                    </div>
+                    <div>Γεια σας! Είμαι ο βοηθός για το ελληνικό ντέρμπι Ολυμπιακός-Παναθηναϊκός. Πώς μπορώ να σας βοηθήσω σήμερα;</div>
+                </div>
+            </div>
+            
+            <div class="scroll-controls">
+                <button class="scroll-button" id="scrollToBottom" onclick="scrollToBottom()" title="Πήγαινε στο κάτω μέρος">
+                    ⬇️
+                </button>
+            </div>
+            
+            <div class="loading" id="loading">
+                ⏳ Απαντάω στην ερώτησή σας...
+            </div>
+            
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    class="message-input" 
+                    id="messageInput" 
+                    placeholder="Ρωτήστε για το ντέρμπι..."
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button class="send-button" id="sendButton" onclick="sendMessage()">
+                    📤 Στείλε
+                </button>
+            </div>
+            
+            <div class="sample-questions">
+                <h3>💡 Δείγμα Ερωτήσεων:</h3>
+                <div id="sampleQuestions"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let sampleQuestions = [];
+
+        // Load sample questions
+        async function loadSampleQuestions() {
+            try {
+                const response = await fetch(`${API_BASE}/sample-questions`);
+                const data = await response.json();
+                sampleQuestions = data.sample_questions;
+                
+                const container = document.getElementById('sampleQuestions');
+                sampleQuestions.forEach(question => {
+                    const div = document.createElement('div');
+                    div.className = 'sample-question';
+                    div.textContent = question;
+                    div.onclick = () => {
+                        document.getElementById('messageInput').value = question;
+                        sendMessage();
+                    };
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error loading sample questions:', error);
+            }
+        }
+
+        // Send message to chatbot
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Show loading
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: message })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addMessage(data.answer, 'bot');
+                } else {
+                    addMessage(`Σφάλμα: ${data.detail}`, 'bot', true);
+                }
+            } catch (error) {
+                addMessage(`Σφάλμα σύνδεσης: ${error.message}`, 'bot', true);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Add message to chat
+        function addMessage(text, sender, isError = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message${isError ? ' error' : ''}`;
+            
+            const senderName = sender === 'user' ? 'Εσείς' : 'Chatbot';
+            const timestamp = new Date().toLocaleTimeString('el-GR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <strong>${senderName}</strong>
+                    <small style="opacity: 0.7; font-size: 0.8em;">${timestamp}</small>
+                </div>
+                <div>${text}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            
+            // Smooth scroll to bottom
+            setTimeout(() => {
+                chatMessages.scrollTo({
+                    top: chatMessages.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
+        }
+
+        // Show/hide loading
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const sendButton = document.getElementById('sendButton');
+            
+            loading.style.display = show ? 'block' : 'none';
+            sendButton.disabled = show;
+        }
+
+        // Handle Enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Scroll to bottom function
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        // Check if user is near bottom of chat
+        function isNearBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            const threshold = 100; // pixels from bottom
+            return (chatMessages.scrollHeight - chatMessages.scrollTop - chatMessages.clientHeight) < threshold;
+        }
+
+        // Show/hide scroll button based on scroll position
+        function updateScrollButton() {
+            const scrollButton = document.getElementById('scrollToBottom');
+            const chatMessages = document.getElementById('chatMessages');
+            
+            if (isNearBottom()) {
+                scrollButton.classList.add('hidden');
+            } else {
+                scrollButton.classList.remove('hidden');
+            }
+        }
+
+        // Add scroll event listener
+        function setupScrollListener() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.addEventListener('scroll', updateScrollButton);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSampleQuestions();
+            setupScrollListener();
+            
+            // Set initial timestamp for welcome message
+            const welcomeMessage = document.querySelector('.message.bot-message');
+            if (welcomeMessage) {
+                const timestamp = new Date().toLocaleTimeString('el-GR', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                const timeElement = welcomeMessage.querySelector('small');
+                if (timeElement) {
+                    timeElement.textContent = timestamp;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -90,7 +90,7 @@ class GreekDerbyChatbot:
     def _init_vector_store(self):
         """Initialize vector store"""
         pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
-        self.index = pc.Index(os.getenv('PINECONE_INDEX_NAME'))
+        self.index = pc.Index(os.getenv('PINECONE_GREEK_DERBY_INDEX_NAME'))
         self.vector_store = PineconeVectorStore(embedding=self.embeddings, index=self.index)
         print("✅ Vector store initialized")
     
