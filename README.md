@@ -74,7 +74,23 @@ cd front-end/react-chatbot
 npm run dev
 ```
 
-**Option B: Vanilla JavaScript Frontend**
+**Option B: With Automated Updates**
+```bash
+# Terminal 1: Start Backend API
+cd backend/api
+python greek_derby_api.py
+
+# Terminal 2: Start React Frontend
+cd front-end/react-chatbot
+npm run dev
+
+# Terminal 3: Setup Automated Updates (Optional)
+cd backend/scheduler
+python update_vector_db.py  # Test run
+# Then setup cron job or Windows Task Scheduler
+```
+
+**Option C: Vanilla JavaScript Frontend**
 ```bash
 # Terminal 1: Start Backend API
 cd backend/api
@@ -84,7 +100,7 @@ python greek_derby_api.py
 # Open front-end/vanilla_javascript/chatbot_web_client.html in browser
 ```
 
-**Option C: Standalone Application**
+**Option D: Standalone Application**
 ```bash
 cd backend/standalone-service
 python greek_derby_chatbot.py
@@ -99,6 +115,12 @@ rag-langchain-langgraph/
 │   │   └── greek_derby_api.py          # FastAPI web server
 │   ├── standalone-service/
 │   │   └── greek_derby_chatbot.py      # Core RAG chatbot
+│   ├── scheduler/
+│   │   ├── update_vector_db.py         # Automated updater script
+│   │   ├── schedule_updates.sh         # Linux/macOS cron job
+│   │   ├── schedule_updates.bat        # Windows batch script
+│   │   ├── monitor.py                  # Health monitoring
+│   │   └── README.md                   # Scheduler documentation
 │   └── README.md                       # Backend documentation
 ├── front-end/
 │   ├── react-chatbot/                  # Modern React frontend
@@ -201,6 +223,38 @@ The system automatically loads content from:
 - **Content Filtering**: Removes irrelevant or short content
 - **Greek-friendly Splitting**: Optimized chunking for Greek language
 - **Metadata Enrichment**: Source URLs and content type information
+
+### **Automated Updates (Optional)**
+Keep your vector database fresh with automated hourly updates:
+
+**Setup Automated Updates:**
+```bash
+# Install scheduler dependencies
+cd backend/scheduler
+pip install -r requirements.txt
+
+# Test the updater
+python update_vector_db.py
+
+# Setup scheduling (choose one):
+
+# Linux/macOS (Cron)
+chmod +x schedule_updates.sh
+crontab -e
+# Add: 0 * * * * /path/to/rag-langchain-langgraph/backend/scheduler/schedule_updates.sh
+
+# Windows (Task Scheduler)
+# Use schedule_updates.bat with Windows Task Scheduler
+```
+
+**Monitor Updates:**
+```bash
+# Check health status
+python monitor.py
+
+# View logs
+tail -f vector_db_updater.log
+```
 
 ## 🧠 RAG System Architecture
 
