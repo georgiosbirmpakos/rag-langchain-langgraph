@@ -26,7 +26,7 @@ A comprehensive RAG (Retrieval-Augmented Generation) chatbot system about the Ol
 
 ### **Prerequisites**
 - Python 3.8+
-- Node.js 16+
+- npm (for React frontend dependencies)
 - OpenAI API key
 - Pinecone API key
 
