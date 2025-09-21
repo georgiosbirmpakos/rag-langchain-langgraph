@@ -317,10 +317,3 @@ print(f"Total vectors: {stats['total_vector_count']}")
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Gazzetta.gr](https://www.gazzetta.gr/) - Source website
 
-## 📄 License
-
-This project is part of a RAG system demonstration. Please respect Gazzetta.gr's terms of service when using their content.
-
----
-
-**Built with ❤️ for Greek football fans** 🇬🇷⚽
