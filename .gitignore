@@ -144,7 +144,7 @@ credentials.json
 data/
 datasets/
 *.csv
-*.json
+# *.json  # Commented out to allow package.json files
 *.parquet
 *.xlsx
 *.xls
