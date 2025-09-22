@@ -29,3 +29,9 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }))
+
+// Mock scrollTo for test environments
+Object.defineProperty(HTMLElement.prototype, 'scrollTo', {
+  value: vi.fn(),
+  writable: true
+})

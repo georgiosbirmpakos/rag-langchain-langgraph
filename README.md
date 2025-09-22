@@ -74,7 +74,7 @@ cd front-end/react-chatbot
 npm run dev
 ```
 
-**Option B: With Automated Updates**
+**Option B: With Development Tools**
 ```bash
 # Terminal 1: Start Backend API
 cd backend/api
@@ -84,10 +84,9 @@ python greek_derby_api.py
 cd front-end/react-chatbot
 npm run dev
 
-# Terminal 3: Setup Automated Updates (Optional)
-cd backend/scheduler
-python update_vector_db.py  # Test run
-# Then setup cron job or Windows Task Scheduler
+# Terminal 3: Run Tests (Optional)
+cd backend
+python -m pytest tests/ -v
 ```
 
 **Option C: Vanilla JavaScript Frontend**
@@ -115,12 +114,10 @@ rag-langchain-langgraph/
 │   │   └── greek_derby_api.py          # FastAPI web server
 │   ├── standalone-service/
 │   │   └── greek_derby_chatbot.py      # Core RAG chatbot
-│   ├── scheduler/
-│   │   ├── update_vector_db.py         # Automated updater script
-│   │   ├── schedule_updates.sh         # Linux/macOS cron job
-│   │   ├── schedule_updates.bat        # Windows batch script
-│   │   ├── monitor.py                  # Health monitoring
-│   │   └── README.md                   # Scheduler documentation
+│   ├── tests/
+│   │   ├── test_api.py                 # API endpoint tests
+│   │   ├── test_rag_system.py          # RAG system tests
+│   │   └── conftest.py                 # Test configuration
 │   └── README.md                       # Backend documentation
 ├── front-end/
 │   ├── react-chatbot/                  # Modern React frontend
@@ -224,36 +221,33 @@ The system automatically loads content from:
 - **Greek-friendly Splitting**: Optimized chunking for Greek language
 - **Metadata Enrichment**: Source URLs and content type information
 
-### **Automated Updates (Optional)**
-Keep your vector database fresh with automated hourly updates:
+### **Testing and Development**
+Run tests and development tools:
 
-**Setup Automated Updates:**
+**Run Tests:**
 ```bash
-# Install scheduler dependencies
-cd backend/scheduler
-pip install -r requirements.txt
+# Backend tests
+cd backend
+python -m pytest tests/ -v
 
-# Test the updater
-python update_vector_db.py
+# Frontend tests
+cd front-end/react-chatbot
+npm test
 
-# Setup scheduling (choose one):
-
-# Linux/macOS (Cron)
-chmod +x schedule_updates.sh
-crontab -e
-# Add: 0 * * * * /path/to/rag-langchain-langgraph/backend/scheduler/schedule_updates.sh
-
-# Windows (Task Scheduler)
-# Use schedule_updates.bat with Windows Task Scheduler
+# Run all tests with coverage
+cd backend
+python -m pytest tests/ --cov=. --cov-report=html
 ```
 
-**Monitor Updates:**
+**Development Tools:**
 ```bash
-# Check health status
-python monitor.py
+# Code formatting
+cd backend
+black .
+isort .
 
-# View logs
-tail -f vector_db_updater.log
+# Linting
+flake8 .
 ```
 
 ## 🧠 RAG System Architecture

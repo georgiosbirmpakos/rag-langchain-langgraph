@@ -31,10 +31,16 @@ export function useScrollToBottom(options: UseScrollToBottomOptions = {}) {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: 'smooth'
-    });
+    // Check if scrollTo is available (for test environments)
+    if (typeof container.scrollTo === 'function') {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
+      });
+    } else {
+      // Fallback for test environments
+      container.scrollTop = container.scrollHeight;
+    }
   }, []);
 
   // Set up scroll event listener
