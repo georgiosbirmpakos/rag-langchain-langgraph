@@ -1,0 +1,15 @@
+beautifulsoup4==4.13.5
+fastapi==0.117.1
+langchain==0.3.27
+langchain_community==0.3.29
+langchain_core==0.3.76
+langchain_openai==0.3.33
+langchain_pinecone==0.2.12
+langchain_text_splitters==0.3.11
+langgraph==0.6.7
+pinecone==7.3.0
+pydantic==2.11.9
+python-dotenv==1.1.1
+Requests==2.32.5
+typing_extensions==4.15.0
+uvicorn==0.36.0
