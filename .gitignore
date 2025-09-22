@@ -188,9 +188,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # Docker
-.dockerignore
-Dockerfile
-docker-compose.yml
 .docker/
 
 # Database files
