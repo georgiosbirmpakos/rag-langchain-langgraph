@@ -4,98 +4,109 @@ A standalone interactive chatbot about Olympiakos vs Panathinaikos derby
 using RAG (Retrieval-Augmented Generation) with memory.
 """
 
+import json
 import os
 import sys
-import json
-from typing import List, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List
 
-# LangChain imports
-from langchain.chat_models import init_chat_model
-from langchain_openai import OpenAIEmbeddings
-from langchain_pinecone import PineconeVectorStore
-from langchain_core.documents import Document
-from langchain.memory import ConversationBufferMemory
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.prompts import PromptTemplate
-from langgraph.graph import StateGraph, START, END
-from typing_extensions import TypedDict
-
-# Web scraping imports
-from langchain_community.document_loaders import WebBaseLoader
 import bs4
 import requests
 
+# LangChain imports
+from langchain.chat_models import init_chat_model
+from langchain.memory import ConversationBufferMemory
+from langchain.prompts import PromptTemplate
+
+# Web scraping imports
+from langchain_community.document_loaders import WebBaseLoader
+from langchain_core.documents import Document
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_openai import OpenAIEmbeddings
+from langchain_pinecone import PineconeVectorStore
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langgraph.graph import END, START, StateGraph
+
 # Pinecone
 from pinecone import Pinecone
+from typing_extensions import TypedDict
+
 
 class GreekDerbyState(TypedDict):
     question: str
     context: List[Document]
     answer: str
 
+
 class GreekDerbyChatbot:
     """Interactive RAG chatbot for Greek Derby discussions"""
-    
+
     def __init__(self):
         """Initialize the chatbot with all necessary components"""
         print("🚀 Initializing Greek Derby RAG Chatbot...")
-        
+
         # Load environment variables
         self._load_environment()
-        
+
         # Initialize components
         self._init_llm()
         self._init_embeddings()
         self._init_vector_store()
         self._init_rag_system()
         self._init_memory()
-        
+
         # Load or create knowledge base
         self._load_knowledge_base()
-        
+
         print("✅ Greek Derby Chatbot initialized successfully!")
-    
+
     def _load_environment(self):
         """Load environment variables"""
         try:
             from dotenv import load_dotenv
+
             load_dotenv()
         except ImportError:
-            print("⚠️  python-dotenv not installed. Make sure to set environment variables manually.")
-        
+            print(
+                "⚠️  python-dotenv not installed. Make sure to set environment variables manually."
+            )
+
         # Check required environment variables
-        required_vars = ['OPENAI_API_KEY', 'PINECONE_API_KEY', 'PINECONE_GREEK_DERBY_INDEX_NAME']
+        required_vars = [
+            "OPENAI_API_KEY",
+            "PINECONE_API_KEY",
+            "PINECONE_GREEK_DERBY_INDEX_NAME",
+        ]
         missing_vars = [var for var in required_vars if not os.getenv(var)]
-        
+
         if missing_vars:
             print(f"❌ Missing environment variables: {', '.join(missing_vars)}")
             print("Please set these variables in your .env file or environment")
             sys.exit(1)
-        
+
         print("✅ Environment variables loaded")
-    
+
     def _init_llm(self):
         """Initialize the language model"""
         self.llm = init_chat_model("gpt-4o-mini", model_provider="openai")
         print("✅ Language model initialized")
-    
+
     def _init_embeddings(self):
         """Initialize embeddings model"""
         self.embeddings = OpenAIEmbeddings(
-            model="text-embedding-3-small",
-            dimensions=1024
+            model="text-embedding-3-small", dimensions=1024
         )
         print("✅ Embeddings model initialized")
-    
+
     def _init_vector_store(self):
         """Initialize vector store"""
-        pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
-        self.index = pc.Index(os.getenv('PINECONE_GREEK_DERBY_INDEX_NAME'))
-        self.vector_store = PineconeVectorStore(embedding=self.embeddings, index=self.index)
+        pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+        self.index = pc.Index(os.getenv("PINECONE_GREEK_DERBY_INDEX_NAME"))
+        self.vector_store = PineconeVectorStore(
+            embedding=self.embeddings, index=self.index
+        )
         print("✅ Vector store initialized")
-    
+
     def _init_rag_system(self):
         """Initialize RAG system components"""
         # Create Greek language prompt
@@ -112,39 +123,41 @@ class GreekDerbyChatbot:
 Περιεχόμενο: {context}
 
 Ερώτηση: {question}
-Απάντηση:"""
+Απάντηση:""",
         )
-        
+
         # Define RAG functions
         def retrieve_greek_content(state: GreekDerbyState):
-            retrieved_docs = self.vector_store.similarity_search(
-                state["question"], 
-                k=4
-            )
+            retrieved_docs = self.vector_store.similarity_search(state["question"], k=4)
             return {"context": retrieved_docs}
 
         def generate_greek_answer(state: GreekDerbyState):
             docs_content = "\n\n".join([doc.page_content for doc in state["context"]])
-            messages = self.prompt.invoke({"question": state["question"], "context": docs_content})
+            messages = self.prompt.invoke(
+                {"question": state["question"], "context": docs_content}
+            )
             response = self.llm.invoke(messages)
             return {"answer": response.content}
-        
+
         # Build RAG graph
         graph_builder = StateGraph(GreekDerbyState)
         graph_builder.add_sequence([retrieve_greek_content, generate_greek_answer])
         graph_builder.add_edge(START, "retrieve_greek_content")
         self.rag_graph = graph_builder.compile()
-        
+
         print("✅ RAG system initialized")
-    
+
     def _init_memory(self):
         """Initialize conversation memory"""
         self.memory = ConversationBufferMemory(return_messages=True)
         self.conversation_history = []
-        
+
         # Enhanced prompt for conversational RAG
-        self.chat_prompt = ChatPromptTemplate.from_messages([
-            ("system", """Είστε ένας εξειδικευμένος βοηθός για το ελληνικό ποδόσφαιρο και το ντέρμπι Ολυμπιακός-Παναθηναϊκός.
+        self.chat_prompt = ChatPromptTemplate.from_messages(
+            [
+                (
+                    "system",
+                    """Είστε ένας εξειδικευμένος βοηθός για το ελληνικό ποδόσφαιρο και το ντέρμπι Ολυμπιακός-Παναθηναϊκός.
 
 Χρησιμοποιήστε τις παρακάτω πληροφορίες για να απαντήσετε στην ερώτηση του χρήστη.
 Αν δεν γνωρίζετε την απάντηση, πείτε ότι δεν γνωρίζετε.
@@ -157,31 +170,38 @@ class GreekDerbyChatbot:
 {chat_history}
 
 Ερώτηση: {question}
-Απάντηση:"""),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{question}")
-        ])
-        
+Απάντηση:""",
+                ),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("human", "{question}"),
+            ]
+        )
+
         print("✅ Memory system initialized")
-    
+
     def _load_knowledge_base(self):
         """Load or create the knowledge base"""
         stats = self.index.describe_index_stats()
-        
-        if stats['total_vector_count'] == 0:
+
+        if stats["total_vector_count"] == 0:
             print("📚 No knowledge base found. Loading content from Gazzetta.gr...")
             self._load_gazzetta_content()
         else:
-            print(f"📚 Knowledge base loaded with {stats['total_vector_count']} vectors")
-    
+            print(
+                f"📚 Knowledge base loaded with {stats['total_vector_count']} vectors"
+            )
+
     def _load_gazzetta_content(self):
         """Load content from Gazzetta.gr for Greek derby information"""
         import time
+
         import bs4
-        
+
         # Set user agent to avoid blocking
-        os.environ['USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        
+        os.environ["USER_AGENT"] = (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        )
+
         # URLs to scrape from Gazzetta.gr related to Olympiakos and Panathinaikos
         greek_derby_urls = [
             "https://www.gazzetta.gr/football/superleague/olympiakos",
@@ -189,90 +209,116 @@ class GreekDerbyChatbot:
             "https://www.gazzetta.gr/football/superleague",
             "https://www.gazzetta.gr",
         ]
-        
+
         print("Loading Greek football content from Gazzetta.gr...")
-        
+
         # Load content from multiple URLs with better selectors
         all_docs = []
         for url in greek_derby_urls:
             try:
                 print(f"Loading: {url}")
-                
+
                 # First try with broader selectors to get more content
                 loader = WebBaseLoader(
                     web_paths=(url,),
                     bs_kwargs=dict(
                         parse_only=bs4.SoupStrainer(
-                            class_=("article-content", "article-title", "article-body", "content", "post-content", 
-                                   "entry-content", "post-body", "article-text", "main-content", "story-content",
-                                   "article", "post", "content-area", "main", "body")
+                            class_=(
+                                "article-content",
+                                "article-title",
+                                "article-body",
+                                "content",
+                                "post-content",
+                                "entry-content",
+                                "post-body",
+                                "article-text",
+                                "main-content",
+                                "story-content",
+                                "article",
+                                "post",
+                                "content-area",
+                                "main",
+                                "body",
+                            )
                         )
                     ),
                 )
                 docs = loader.load()
-                
+
                 # If no content found, try without any class filtering
                 if not docs or all(len(doc.page_content.strip()) < 100 for doc in docs):
-                    print(f"  No content found with selectors, trying without filtering...")
+                    print(
+                        f"  No content found with selectors, trying without filtering..."
+                    )
                     loader_fallback = WebBaseLoader(web_paths=(url,))
                     docs = loader_fallback.load()
-                
+
                 # Filter out very short documents
                 valid_docs = [doc for doc in docs if len(doc.page_content.strip()) > 50]
                 all_docs.extend(valid_docs)
-                
+
                 print(f"  Found {len(valid_docs)} valid documents from {url}")
                 time.sleep(1)  # Be respectful to the server
-                
+
             except Exception as e:
                 print(f"Error loading {url}: {e}")
                 continue
-        
+
         print(f"Loaded {len(all_docs)} documents from Gazzetta.gr")
-        
+
         # If still no content, try a different approach with requests
-        if len(all_docs) == 0 or all(len(doc.page_content.strip()) < 100 for doc in all_docs):
+        if len(all_docs) == 0 or all(
+            len(doc.page_content.strip()) < 100 for doc in all_docs
+        ):
             print("\nTrying alternative approach with requests...")
             try:
                 import requests
-                response = requests.get("https://www.gazzetta.gr/football/superleague", 
-                                      headers={'User-Agent': os.environ['USER_AGENT']})
+
+                response = requests.get(
+                    "https://www.gazzetta.gr/football/superleague",
+                    headers={"User-Agent": os.environ["USER_AGENT"]},
+                )
                 if response.status_code == 200:
                     # Create a document from the raw HTML content
                     fallback_doc = Document(
                         page_content=response.text,
-                        metadata={"source": "https://www.gazzetta.gr/football/superleague", "method": "requests"}
+                        metadata={
+                            "source": "https://www.gazzetta.gr/football/superleague",
+                            "method": "requests",
+                        },
                     )
                     all_docs.append(fallback_doc)
                     print("Added fallback document from requests")
             except Exception as e:
                 print(f"Fallback approach also failed: {e}")
-        
+
         if not all_docs:
-            print("❌ Failed to load content from Gazzetta.gr. Falling back to sample content...")
+            print(
+                "❌ Failed to load content from Gazzetta.gr. Falling back to sample content..."
+            )
             self._create_sample_knowledge_base()
             return
-        
+
         # Split and store the documents
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=500,
             chunk_overlap=100,
-            separators=["\n\n", "\n", ". ", "! ", "? ", " ", ""]
+            separators=["\n\n", "\n", ". ", "! ", "? ", " ", ""],
         )
-        
+
         splits = text_splitter.split_documents(all_docs)
-        
+
         # Add metadata to identify the source
         for split in splits:
             if "source" not in split.metadata:
                 split.metadata["source"] = "gazzetta.gr"
             split.metadata["type"] = "greek_derby_news"
-        
+
         # Store in vector database
         self.vector_store.add_documents(splits)
-        
+
         print(f"✅ Gazzetta.gr knowledge base created with {len(splits)} chunks")
-    
+
     def _create_sample_knowledge_base(self):
         """Create sample knowledge base with Greek derby content (fallback)"""
         sample_content = """
@@ -308,110 +354,120 @@ class GreekDerbyChatbot:
 Ο Ολυμπιακός έχει κερδίσει περισσότερες φορές το ντέρμπι στην ιστορία.
 Οι αγώνες είναι γεμάτοι ένταση και συχνά κρίνουν τίτλους.
         """
-        
+
         # Create document
         sample_doc = Document(
             page_content=sample_content,
-            metadata={"source": "sample_content", "type": "greek_derby_info"}
+            metadata={"source": "sample_content", "type": "greek_derby_info"},
         )
-        
+
         # Split and store
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=500,
             chunk_overlap=100,
-            separators=["\n\n", "\n", ". ", "! ", "? ", " ", ""]
+            separators=["\n\n", "\n", ". ", "! ", "? ", " ", ""],
         )
-        
+
         splits = text_splitter.split_documents([sample_doc])
         self.vector_store.add_documents(splits)
-        
+
         print(f"✅ Sample knowledge base created with {len(splits)} chunks")
-    
+
     def chat(self, user_input: str) -> str:
         """Process user input and return chatbot response"""
         try:
             # Get relevant context using RAG
             rag_response = self.rag_graph.invoke({"question": user_input})
             context = rag_response.get("context", [])
-            
+
             # Format context for the prompt
             context_text = "\n\n".join([doc.page_content for doc in context])
-            
+
             # Get conversation history
             chat_history = self.memory.chat_memory.messages
-            
+
             # Create the prompt
             messages = self.chat_prompt.format_messages(
-                context=context_text,
-                chat_history=chat_history,
-                question=user_input
+                context=context_text, chat_history=chat_history, question=user_input
             )
-            
+
             # Get response from LLM
             response = self.llm.invoke(messages)
-            
+
             # Store in memory
             self.memory.chat_memory.add_user_message(user_input)
             self.memory.chat_memory.add_ai_message(response.content)
-            
+
             # Store in conversation history
-            self.conversation_history.append({
-                "timestamp": datetime.now().isoformat(),
-                "user": user_input,
-                "bot": response.content,
-                "context_sources": [doc.metadata.get("source", "unknown") for doc in context]
-            })
-            
+            self.conversation_history.append(
+                {
+                    "timestamp": datetime.now().isoformat(),
+                    "user": user_input,
+                    "bot": response.content,
+                    "context_sources": [
+                        doc.metadata.get("source", "unknown") for doc in context
+                    ],
+                }
+            )
+
             return response.content
-            
+
         except Exception as e:
             error_msg = f"Σφάλμα: {str(e)}"
             self.memory.chat_memory.add_user_message(user_input)
             self.memory.chat_memory.add_ai_message(error_msg)
             return error_msg
-    
+
     def get_conversation_history(self) -> List[Dict[str, Any]]:
         """Get the full conversation history"""
         return self.conversation_history
-    
+
     def clear_memory(self):
         """Clear conversation memory"""
         self.memory.clear()
         self.conversation_history = []
         print("Η μνήμη της συνομιλίας διαγράφηκε.")
-    
+
     def get_memory_summary(self) -> str:
         """Get a summary of the conversation"""
         if not self.conversation_history:
             return "Δεν υπάρχει ιστορικό συνομιλίας."
-        
+
         summary = f"Συνομιλία με {len(self.conversation_history)} ερωτήσεις:\n"
         for i, conv in enumerate(self.conversation_history, 1):
             summary += f"{i}. Ερώτηση: {conv['user'][:50]}...\n"
             summary += f"   Απάντηση: {conv['bot'][:50]}...\n"
-        
+
         return summary
-    
+
     def export_conversation(self, filename: str = None):
         """Export conversation to JSON file"""
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"greek_derby_chat_{timestamp}.json"
-        
-        with open(filename, 'w', encoding='utf-8') as f:
+
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(self.conversation_history, f, ensure_ascii=False, indent=2)
         print(f"Συνομιλία εξήχθη στο αρχείο: {filename}")
-    
+
     def get_stats(self) -> str:
         """Get conversation statistics"""
         if not self.conversation_history:
             return "Δεν υπάρχει συνομιλία ακόμα."
-        
+
         total_questions = len(self.conversation_history)
-        total_chars = sum(len(conv['user']) + len(conv['bot']) for conv in self.conversation_history)
-        avg_question_length = sum(len(conv['user']) for conv in self.conversation_history) / total_questions
-        avg_answer_length = sum(len(conv['bot']) for conv in self.conversation_history) / total_questions
-        
+        total_chars = sum(
+            len(conv["user"]) + len(conv["bot"]) for conv in self.conversation_history
+        )
+        avg_question_length = (
+            sum(len(conv["user"]) for conv in self.conversation_history)
+            / total_questions
+        )
+        avg_answer_length = (
+            sum(len(conv["bot"]) for conv in self.conversation_history)
+            / total_questions
+        )
+
         return f"""
 📊 Στατιστικά Συνομιλίας:
 - Συνολικές Ερωτήσεις: {total_questions}
@@ -419,6 +475,7 @@ class GreekDerbyChatbot:
 - Μέσος Όρος Μήκους Ερώτησης: {avg_question_length:.1f} χαρακτήρες
 - Μέσος Όρος Μήκους Απάντησης: {avg_answer_length:.1f} χαρακτήρες
 """
+
 
 def print_welcome():
     """Print welcome message"""
@@ -438,62 +495,65 @@ def print_welcome():
     print("  - 'έξοδος' - Τερματίστε το πρόγραμμα")
     print("=" * 70)
 
+
 def main():
     """Main function to run the chatbot"""
     try:
         # Initialize chatbot
         chatbot = GreekDerbyChatbot()
-        
+
         # Print welcome message
         print_welcome()
-        
+
         # Main chat loop
         while True:
             try:
                 # Get user input
                 user_input = input("\n👤 Εσείς: ").strip()
-                
+
                 # Handle special commands
-                if user_input.lower() in ['έξοδος', 'exit', 'quit', 'q']:
+                if user_input.lower() in ["έξοδος", "exit", "quit", "q"]:
                     print("\n👋 Αντίο! Ευχαριστούμε που συνομλήσατε για το ντέρμπι!")
                     break
-                elif user_input.lower() == 'ιστορικό':
+                elif user_input.lower() == "ιστορικό":
                     print("\n📚 Ιστορικό Συνομιλίας:")
                     print(chatbot.get_memory_summary())
                     continue
-                elif user_input.lower() == 'διαγραφή':
+                elif user_input.lower() == "διαγραφή":
                     chatbot.clear_memory()
                     continue
-                elif user_input.lower() == 'στατιστικά':
+                elif user_input.lower() == "στατιστικά":
                     print(chatbot.get_stats())
                     continue
-                elif user_input.lower() == 'εξαγωγή':
+                elif user_input.lower() == "εξαγωγή":
                     chatbot.export_conversation()
                     continue
-                elif user_input.lower() == 'βοήθεια':
+                elif user_input.lower() == "βοήθεια":
                     print_welcome()
                     continue
                 elif not user_input:
                     print("Παρακαλώ εισάγετε μια ερώτηση ή εντολή.")
                     continue
-                
+
                 # Get chatbot response
                 print("\n🤖 Bot: ", end="")
                 response = chatbot.chat(user_input)
                 print(response)
-                
+
             except KeyboardInterrupt:
                 print("\n\n👋 Αντίο! Ευχαριστούμε που συνομλήσατε για το ντέρμπι!")
                 break
             except Exception as e:
                 print(f"\n❌ Σφάλμα: {e}")
-                print("Παρακαλώ δοκιμάστε ξανά ή πληκτρολογήστε 'έξοδος' για να τερματίσετε.")
-    
+                print(
+                    "Παρακαλώ δοκιμάστε ξανά ή πληκτρολογήστε 'έξοδος' για να τερματίσετε."
+                )
+
     except Exception as e:
         print(f"❌ Κρίσιμο σφάλμα κατά την αρχικοποίηση: {e}")
         print("Παρακαλώ ελέγξτε τις μεταβλητές περιβάλλοντος και τις συνδέσεις.")
         sys.exit(1)
 
+
 if __name__ == "__main__":
     main()
-
