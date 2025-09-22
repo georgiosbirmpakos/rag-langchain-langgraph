@@ -1,5 +1,5 @@
 # Multi-stage build for React app
-FROM node:20-alpine as base
+FROM node:20-alpine AS base
 
 # Set working directory
 WORKDIR /app
@@ -9,14 +9,14 @@ ENV NODE_ENV=production
 ENV NPM_CONFIG_CACHE=/tmp/.npm
 
 # Development stage
-FROM base as development
+FROM base AS development
 COPY package*.json ./
 RUN npm ci
 COPY . .
 CMD ["npm", "run", "dev"]
 
 # Build stage
-FROM base as build
+FROM base AS build
 
 # Copy package files
 COPY package*.json ./
@@ -34,7 +34,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine as production
+FROM nginx:alpine AS production
 
 # Install curl for health checks
 RUN apk add --no-cache curl
@@ -45,10 +45,8 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Create nginx user and set permissions
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S -D -H -u 1001 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx && \
-    chown -R nginx:nginx /usr/share/nginx/html && \
+# Set proper permissions for nginx user
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
     chown -R nginx:nginx /var/cache/nginx && \
     chown -R nginx:nginx /var/log/nginx && \
     chown -R nginx:nginx /etc/nginx/conf.d
