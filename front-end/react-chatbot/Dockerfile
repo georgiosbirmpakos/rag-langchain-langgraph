@@ -1,5 +1,5 @@
 # Multi-stage build for React app
-FROM node:18-alpine as base
+FROM node:20-alpine as base
 
 # Set working directory
 WORKDIR /app
@@ -22,7 +22,10 @@ FROM base as build
 COPY package*.json ./
 
 # Install dependencies (including dev dependencies for build)
-RUN npm ci --only=production=false
+RUN npm ci --include=dev
+
+# Verify TypeScript is installed
+RUN npx tsc --version
 
 # Copy source code
 COPY . .
