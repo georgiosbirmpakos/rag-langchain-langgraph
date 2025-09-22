@@ -3,12 +3,6 @@ Tests for the RAG system components.
 """
 import pytest
 from unittest.mock import patch, MagicMock
-import os
-
-# Mock environment variables
-os.environ["OPENAI_API_KEY"] = "test-key"
-os.environ["PINECONE_API_KEY"] = "test-key"
-os.environ["PINECONE_GREEK_DERBY_INDEX_NAME"] = "test-index"
 
 
 class TestRAGSystem:

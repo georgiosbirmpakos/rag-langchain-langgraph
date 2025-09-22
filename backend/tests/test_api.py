@@ -4,14 +4,22 @@ Tests for the Greek Derby API endpoints.
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
+import sys
 import os
 
-# Mock environment variables before importing the API
-os.environ["OPENAI_API_KEY"] = "test-key"
-os.environ["PINECONE_API_KEY"] = "test-key"
-os.environ["PINECONE_GREEK_DERBY_INDEX_NAME"] = "test-index"
+# Add tests directory to path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from api.greek_derby_api import app
+# Mock the chatbot import
+with patch.dict('sys.modules', {
+    'greek_derby_chatbot': MagicMock()
+}):
+    # Import the mock chatbot
+    from mock_chatbot import MockGreekDerbyChatbot
+    
+    # Patch the import in the API module
+    with patch('api.greek_derby_api.GreekDerbyChatbot', MockGreekDerbyChatbot):
+        from api.greek_derby_api import app
 
 client = TestClient(app)
 
