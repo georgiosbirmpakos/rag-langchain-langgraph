@@ -1,7 +1,7 @@
 // Header component for the application title and description
 // This is a simple presentational component
 
-import React from 'react';
+;
 import './Header.css';
 
 export function Header() {

@@ -1,7 +1,7 @@
 // Main App component - the root of our React application
 // This sets up the context provider and renders the main layout
 
-import React from 'react';
+;
 import { ChatProvider } from './context/ChatContext';
 import { Header } from './components/Header';
 import { Chat } from './components/Chat';

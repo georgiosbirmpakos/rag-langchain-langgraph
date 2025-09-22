@@ -1,7 +1,7 @@
 // SampleQuestions component for displaying clickable sample questions
 // This loads questions from the API and handles clicks
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useChat } from '../context/ChatContext';
 import { useSampleQuestions } from '../hooks/useApi';
 import './SampleQuestions.css';

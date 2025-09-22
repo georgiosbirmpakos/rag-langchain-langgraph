@@ -1,7 +1,7 @@
 // Message component for displaying individual chat messages
 // This is a pure component that handles both user and bot messages
 
-import React from 'react';
+;
 import type { Message as MessageType } from '../types';
 import './Message.css';
 

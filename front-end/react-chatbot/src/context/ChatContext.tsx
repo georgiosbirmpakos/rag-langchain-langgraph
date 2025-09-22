@@ -1,7 +1,7 @@
 // React Context for global chat state management
 // This provides a clean way to share state across components without prop drilling
 
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, type ReactNode } from 'react';
 import type { Message, ChatState } from '../types';
 
 // Action types for the reducer

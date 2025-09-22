@@ -1,7 +1,7 @@
 // Main Chat component that orchestrates all chat functionality
 // This is the central component that brings everything together
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { useChat } from '../context/ChatContext';
 import { useScrollToBottom } from '../hooks/useScrollToBottom';
 import { Message } from './Message';

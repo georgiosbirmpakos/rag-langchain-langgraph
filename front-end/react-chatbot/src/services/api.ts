@@ -6,13 +6,14 @@ import type { ChatResponse, SampleQuestionsResponse, ConversationHistory, StatsR
 
 // Custom error class for API errors
 export class ApiError extends Error {
-  constructor(
-    message: string,
-    public status: number,
-    public statusText: string
-  ) {
+  public status: number;
+  public statusText: string;
+
+  constructor(message: string, status: number, statusText: string) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
+    this.statusText = statusText;
   }
 }
 
