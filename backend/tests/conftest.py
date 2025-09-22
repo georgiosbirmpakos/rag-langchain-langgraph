@@ -35,9 +35,8 @@ mock_modules = {
 for module_name, mock_module in mock_modules.items():
     sys.modules[module_name] = mock_module
 
-import os
-
 # Import mock chatbot
+import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

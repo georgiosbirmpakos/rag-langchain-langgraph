@@ -12,12 +12,10 @@ from typing import Any, Dict, List
 
 import bs4
 import requests
-
 # LangChain imports
 from langchain.chat_models import init_chat_model
 from langchain.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
-
 # Web scraping imports
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_core.documents import Document
@@ -26,8 +24,6 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_pinecone import PineconeVectorStore
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph import END, START, StateGraph
-
-# Pinecone
 from pinecone import Pinecone
 from typing_extensions import TypedDict
 
