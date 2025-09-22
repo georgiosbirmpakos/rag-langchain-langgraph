@@ -1,5 +1,5 @@
 # Use Python 3.11 slim image
-FROM python:3.11-slim
+FROM python:3.11-slim as base
 
 # Set working directory
 WORKDIR /app
@@ -8,12 +8,25 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV USER_AGENT=greek-derby-api/1.0
+ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Development stage
+FROM base as development
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+COPY . .
+CMD ["python", "api/greek_derby_api.py"]
+
+# Production stage
+FROM base as production
 
 # Copy requirements first for better caching
 COPY requirements.txt .
@@ -21,8 +34,10 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the application code
-COPY . .
+# Copy only necessary application code
+COPY api/ ./api/
+COPY standalone-service/ ./standalone-service/
+COPY scheduler/ ./scheduler/
 
 # Create a non-root user
 RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app

@@ -397,6 +397,37 @@ USER_AGENT=greek-derby-chatbot/1.0
 - **Local Processing**: All processing happens on your machine
 - **API Key Protection**: Keys loaded from environment variables
 
+## 🚀 CI/CD Pipeline
+
+### **Automated Workflows**
+- **Continuous Integration**: Automated testing, linting, and security scanning
+- **Continuous Deployment**: Multi-environment deployment with Docker
+- **Dependency Updates**: Weekly automated dependency updates
+- **Security Scanning**: Regular vulnerability assessments
+
+### **Key Features**
+- ✅ **Multi-stage Docker builds** for optimized production images
+- ✅ **Automated testing** for both Python backend and React frontend
+- ✅ **Security scanning** with Trivy and CodeQL
+- ✅ **Code quality checks** with flake8, black, isort, and ESLint
+- ✅ **Coverage reporting** and performance monitoring
+- ✅ **GitHub Container Registry** integration
+
+### **Quick Start with CI/CD**
+```bash
+# 1. Fork the repository
+# 2. Enable GitHub Actions in your fork
+# 3. Set up required secrets in repository settings
+# 4. Push changes to trigger automated workflows
+
+# Required secrets:
+# - OPENAI_API_KEY
+# - PINECONE_API_KEY  
+# - PINECONE_GREEK_DERBY_INDEX_NAME
+```
+
+**For detailed CI/CD documentation, see [.github/README.md](.github/README.md)**
+
 ## 📈 Future Enhancements
 
 ### **Planned Features**
@@ -407,6 +438,9 @@ USER_AGENT=greek-derby-chatbot/1.0
 - [ ] Mobile app
 - [ ] Real-time data updates
 - [ ] Additional Greek sports websites
+- [ ] E2E testing with Playwright
+- [ ] Kubernetes deployment manifests
+- [ ] Monitoring and alerting integration
 
 ### **Contributing**
 1. Fork the repository

@@ -1,0 +1,71 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    - cron: '0 2 * * 1' # Every Monday at 2 AM UTC
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Update Python dependencies
+      run: |
+        cd backend
+        pip install pip-tools
+        pip-compile --upgrade requirements.txt
+        pip-compile --upgrade requirements-dev.txt || echo "No dev requirements found"
+        
+    - name: Update Node.js dependencies
+      run: |
+        cd front-end/react-chatbot
+        npm update
+        npm audit fix --force || echo "Audit fix completed with warnings"
+        
+    - name: Check for changes
+      id: changes
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Create Pull Request
+      if: steps.changes.outputs.changes == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: 'chore: update dependencies'
+        title: 'chore: update dependencies'
+        body: |
+          This PR updates project dependencies to their latest versions.
+          
+          ## Changes
+          - Updated Python dependencies in `backend/requirements.txt`
+          - Updated Node.js dependencies in `front-end/react-chatbot/package.json`
+          
+          ## Testing
+          - [ ] Backend tests pass
+          - [ ] Frontend tests pass
+          - [ ] Docker builds successfully
+          - [ ] Application starts without errors
+        branch: dependency-updates
+        delete-branch: true
